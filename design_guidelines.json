@@ -1,0 +1,206 @@
+{
+  "project_name": "AquaOps - Water Sports & Scuba Dive Owner Control Center",
+  "brand": {
+    "name": "AquaOps",
+    "parent_brand": "Aqua Ride Watersports",
+    "domain_reference": "netraniscubadive.org",
+    "vibe": "Tactical Maritime Command & High-Density Operational Dashboard",
+    "theme": "Dark Marine Navy & Ocean Teal Precision"
+  },
+  "typography": {
+    "font_family_heading": "Outfit, sans-serif",
+    "font_family_body": "Inter, sans-serif",
+    "font_family_mono": "JetBrains Mono, monospace",
+    "font_sizes": {
+      "hero_title": "text-2xl sm:text-3xl font-bold tracking-tight",
+      "section_title": "text-xl sm:text-2xl font-semibold tracking-tight",
+      "card_title": "text-sm font-semibold uppercase tracking-wider text-slate-400",
+      "metric_value": "text-2xl sm:text-3xl font-bold tracking-tight text-white",
+      "body": "text-sm leading-relaxed",
+      "caption": "text-xs text-slate-400"
+    }
+  },
+  "colors": {
+    "theme_mode": "dark",
+    "background_main": "#090D16",
+    "header_navy": "#0F172A",
+    "card_bg": "#111827",
+    "card_border": "border-slate-800/80",
+    "primary_teal": "#06B6D4",
+    "primary_teal_hover": "#0891B2",
+    "accent_cyan": "#22D3EE",
+    "emergency_red": "#EF4444",
+    "emergency_red_hover": "#DC2626",
+    "success_emerald": "#10B981",
+    "warning_amber": "#F59E0B",
+    "info_blue": "#3B82F6",
+    "text_primary": "#F8FAFC",
+    "text_secondary": "#94A3B8",
+    "text_muted": "#64748B",
+    "status_badges": {
+      "confirmed": "bg-emerald-500/15 text-emerald-400 border border-emerald-500/30",
+      "checked_in": "bg-cyan-500/15 text-cyan-400 border border-cyan-500/30",
+      "pending": "bg-amber-500/15 text-amber-400 border border-amber-500/30",
+      "paused": "bg-rose-500/15 text-rose-400 border border-rose-500/30",
+      "completed": "bg-blue-500/15 text-blue-400 border border-blue-500/30"
+    }
+  },
+  "navigation_and_layout": {
+    "structure": "Responsive Mobile-First Bottom Nav + Desktop Left Sidebar Navigation",
+    "top_bar": {
+      "bg": "bg-slate-900/90 backdrop-blur-md border-b border-slate-800",
+      "elements": [
+        "Teal Anchor Logo + Brand Name 'AquaOps'",
+        "Live Weather & Tide Status Pill (e.g. 28°C • Water Clear • Wind 8kt)",
+        "Global Emergency Pause / Resume State Badge",
+        "Notification Bell with live activity alert count",
+        "Sign Out / Owner Profile avatar button"
+      ]
+    },
+    "bottom_tab_bar": {
+      "visible_on": "mobile & tablet (< lg breakpoint)",
+      "items": [
+        { "id": "dashboard", "label": "Dashboard", "icon": "LayoutDashboard" },
+        { "id": "front-desk", "label": "Front Desk", "icon": "UserPlus" },
+        { "id": "bookings", "label": "Bookings", "icon": "Calendar" },
+        { "id": "checkin", "label": "Check-in", "icon": "QrCode" },
+        { "id": "manifest", "label": "Manifest", "icon": "FileText" }
+      ]
+    },
+    "desktop_sidebar": {
+      "visible_on": "desktop (>= lg breakpoint)",
+      "width": "w-64",
+      "bg": "bg-slate-900 border-r border-slate-800"
+    }
+  },
+  "key_features_and_modules": {
+    "control_center": {
+      "header": "Real-time Operations Control Center",
+      "date_display": "Auto-updated current date e.g. July 14, 2026",
+      "emergency_controls": {
+        "emergency_pause_btn": "Triggers operational freeze for all active water sports with modal confirmation",
+        "resume_all_btn": "Restores operations to active state",
+        "activity_toggles": "Individual pause/resume toggle per activity (Scuba, Jet Ski, Parasailing, Speed Boat, Banana Boat, Sea Trek)"
+      },
+      "stats_cards": [
+        { "key": "todays_bookings", "title": "Today's Bookings", "format": "count + growth %" },
+        { "key": "total_guests", "title": "Total Guests", "format": "Retail vs B2B breakdown pill" },
+        { "key": "revenue_today", "title": "Revenue Today", "format": "₹ format with payment mode split" },
+        { "key": "checkins_ratio", "title": "Check-ins", "format": "Ratio e.g. 7 / 11 guests checked in" },
+        { "key": "capacity_utilization", "title": "Total Capacity", "format": "Percentage bar e.g. 78% slots filled" },
+        { "key": "active_closures", "title": "Active Closures", "format": "Count of paused activities with amber/red alert" }
+      ],
+      "charts": [
+        "Hourly Guest Arrival Flow (Recharts Bar chart)",
+        "Revenue Stream Breakdown Retail vs B2B Travel Agents (Recharts Donut chart)"
+      ],
+      "recent_audit_log": "Live feed of front-desk bookings, guest check-ins, and safety waivers signed."
+    },
+    "front_desk": {
+      "title": "Front Desk & Walk-in Booking",
+      "features": [
+        "Quick Walk-in Guest Registration Form",
+        "Activity & Time Slot selector with real-time seat availability badge",
+        "Guest type selector: Retail Customer vs B2B Travel Agent Voucher",
+        "Payment status selector: Paid (UPI, Card, Cash) / Pending",
+        "Instant Booking Voucher generation with printable QR code",
+        "Automatic SMS/WhatsApp waiver link simulation button"
+      ]
+    },
+    "bookings_management": {
+      "title": "Master Bookings List",
+      "filters": ["Search by Name/ID/Phone", "Status (All, Confirmed, Checked-in, Pending, Cancelled)", "Activity Filter", "Date Picker"],
+      "table_columns": ["Booking ID", "Guest Name", "Activity", "Slot Time", "Guests (Adults/Kids)", "Channel (Retail/B2B)", "Payment", "Status", "Actions"],
+      "booking_detail_modal": "View full guest list, safety waiver status, edit equipment requirements, process refund/cancellation, print receipt."
+    },
+    "checkin_station": {
+      "title": "Guest Check-in & Waiver Verification",
+      "features": [
+        "Search by Booking Code or Scan QR",
+        "Instant one-click Check-in action",
+        "Digital Waiver Signature status indicator (Signed / Pending)",
+        "Equipment Allocation Checklist (Fin size, Wetsuit size, BCD size)",
+        "Medical declaration clearance indicator"
+      ]
+    },
+    "manifest_module": {
+      "title": "Batch & Boat Passenger Manifest",
+      "features": [
+        "Batch selector (e.g., 08:00 AM Netrani Island Scuba Boat #1)",
+        "Captain & Lead Diver information section",
+        "Detailed passenger roster with age, swimming proficiency level, emergency contact, assigned instructor",
+        "Print Manifest & Export PDF button styled for marine regulatory compliance"
+      ]
+    },
+    "notifications_drawer": {
+      "title": "Operational Alerts & Weather Wire",
+      "alerts": [
+        "High Tide alert scheduled for 14:30 PM",
+        "Boat #2 engine maintenance due in 3 hours",
+        "B2B Agent 'SeaTours Goa' confirmed 12 guests for 11:00 AM slot"
+      ]
+    }
+  },
+  "component_guidelines": {
+    "cards": "Use flat dark backgrounds (bg-slate-900/90 or bg-gray-900) with subtle 1px border (border-slate-800). Add subtle hover border color shift (hover:border-slate-700).",
+    "buttons": {
+      "primary": "bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-semibold px-4 py-2 rounded-lg transition-colors shadow-md shadow-cyan-500/20",
+      "destructive": "bg-rose-600 hover:bg-rose-500 text-white font-semibold px-4 py-2 rounded-lg transition-colors shadow-md shadow-rose-600/20",
+      "secondary": "bg-slate-800 hover:bg-slate-700 text-slate-200 font-medium px-4 py-2 rounded-lg border border-slate-700 transition-colors",
+      "outline": "border border-slate-700 hover:bg-slate-800 text-slate-300 font-medium px-4 py-2 rounded-lg"
+    },
+    "inputs": "bg-slate-950 border border-slate-800 focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 text-slate-100 rounded-lg px-3 py-2 text-sm placeholder:text-slate-500",
+    "dialogs_and_dropdowns": "MUST have solid bg-slate-900 border border-slate-800 text-slate-100 shadow-xl (NEVER transparent background).",
+    "toasts": "Use sonner for notifications with custom dark maritime styling."
+  },
+  "testing_requirements": {
+    "data_testid_rule": "Every interactive button, input, tab, card metric, filter dropdown, and modal MUST contain a kebab-case `data-testid` attribute.",
+    "key_test_ids": [
+      "data-testid=\"app-header\"",
+      "data-testid=\"brand-logo\"",
+      "data-testid=\"emergency-pause-button\"",
+      "data-testid=\"resume-all-button\"",
+      "data-testid=\"nav-tab-dashboard\"",
+      "data-testid=\"nav-tab-front-desk\"",
+      "data-testid=\"nav-tab-bookings\"",
+      "data-testid=\"nav-tab-checkin\"",
+      "data-testid=\"nav-tab-manifest\"",
+      "data-testid=\"metric-card-todays-bookings\"",
+      "data-testid=\"metric-card-total-guests\"",
+      "data-testid=\"metric-card-revenue-today\"",
+      "data-testid=\"metric-card-checkins\"",
+      "data-testid=\"walkin-booking-submit-btn\"",
+      "data-testid=\"checkin-search-input\"",
+      "data-testid=\"print-manifest-btn\""
+    ]
+  },
+  "image_urls": [
+    {
+      "url": "https://images.unsplash.com/photo-1517627043994-b991abb62fc8?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NTYxOTB8MHwxfHNlYXJjaHwxfHxzY3ViYSUyMGRpdmluZyUyMHdhdGVyJTIwc3BvcnRzJTIwYm9hdCUyMG9jZWFuJTIwYWR2ZW50dXJlfGVufDB8fHx8MTc5MjM3NTkyM3ww&ixlib=rb-4.1.0&q=85",
+      "category": "scuba_underwater",
+      "description": "Underwater pair scuba diving in deep blue reef"
+    },
+    {
+      "url": "https://images.unsplash.com/photo-1622567817558-3eac5d13fa86?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NTYxOTB8MHwxfHNlYXJjaHw0fHxzY3ViYSUyMGRpdmluZyUyMHdhdGVyJTIwc3BvcnRzJTIwYm9hdCUyMG9jZWFuJTIwYWR2ZW50dXJlfGVufDB8fHx8MTc5MjM3NTkyM3ww&ixlib=rb-4.1.0&q=85",
+      "category": "dive_boat",
+      "description": "White and blue dive operation speed boat on sea"
+    },
+    {
+      "url": "https://images.pexels.com/photos/3113238/pexels-photo-3113238.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940",
+      "category": "boat_manifest_hero",
+      "description": "Scuba divers equipped on inflatable boat"
+    },
+    {
+      "url": "https://images.pexels.com/photos/36741300/pexels-photo-36741300.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940",
+      "category": "diver_instructor",
+      "description": "Scuba diver instructor ready on boat"
+    }
+  ],
+  "UNIVERSAL GUIDELINES FOR MAIN AGENT": [
+    "Use Javascript (.js / .jsx) for components as the codebase is JavaScript.",
+    "Do NOT use transparent backgrounds on dropdowns, modals, or headers - always use rich solid dark bg-slate-900 or bg-slate-950.",
+    "Ensure all interactive elements have data-testid attributes for automated test compliance.",
+    "Maintain strict mobile-first layout with bottom navigation tabs on small screens and sidebar on lg screens.",
+    "Emergency Pause state must globally reflect across all active tabs with visual banner indicators."
+  ]
+}

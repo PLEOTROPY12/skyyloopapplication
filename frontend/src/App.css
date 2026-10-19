@@ -1,0 +1,19 @@
+@keyframes ops-rise {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.ops-rise {
+    animation: ops-rise 420ms ease-out both;
+}
+
+input[type="date"]::-webkit-calendar-picker-indicator {
+    filter: invert(0.7);
+}
+
+@media print {
+    .no-print { display: none !important; }
+    body, .min-h-screen { background: #fff !important; color: #000 !important; }
+    .print-area, .print-area * { color: #000 !important; background: #fff !important; border-color: #ccc !important; }
+    main { padding: 0 !important; }
+}

@@ -44,7 +44,11 @@ export default function Manifest() {
   const [m, setM] = useState(null);
 
   useEffect(() => {
-    api.get("/manifest", { params: { date, activity_id: aid, slot } }).then(({ data }) => setM(data));
+    let stale = false;
+    api.get("/manifest", { params: { date, activity_id: aid, slot } })
+      .then(({ data }) => { if (!stale) setM(data); })
+      .catch(() => { if (!stale) setM(null); });
+    return () => { stale = true; };
   }, [date, aid, slot, tick]);
 
   return (

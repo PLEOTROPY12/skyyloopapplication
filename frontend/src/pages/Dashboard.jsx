@@ -101,7 +101,7 @@ export default function Dashboard() {
   const [s, setS] = useState(null);
 
   useEffect(() => {
-    api.get("/dashboard").then(({ data }) => setS(data));
+    api.get("/dashboard").then(({ data }) => setS(data)).catch(() => {});
   }, [tick]);
 
   return (

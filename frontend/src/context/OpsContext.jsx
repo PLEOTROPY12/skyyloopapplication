@@ -15,8 +15,10 @@ export const OpsProvider = ({ children }) => {
   }, []);
 
   useEffect(() => {
-    refreshActivities();
-    api.get("/meta").then(({ data }) => setSlots(data.slots));
+    refreshActivities().catch(() => {});
+    api.get("/meta").then(({ data }) => setSlots(data.slots)).catch(() => {});
+    const t = setInterval(() => refreshActivities().catch(() => {}), 30000);
+    return () => clearInterval(t);
   }, [refreshActivities]);
 
   const run = async (path, msg) => {

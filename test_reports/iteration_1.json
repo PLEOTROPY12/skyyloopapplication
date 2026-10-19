@@ -1,0 +1,47 @@
+{
+  "summary": "First test run of AquaOps (no auth). Backend: 10 pytest tests, 8 passed. The 2 failures are edge cases: an unescaped regex in search causes a 500, and an invalid date gets accepted. Frontend (1920 desktop + 390 mobile): all requested flows work. Checked: dashboard 6 stat cards match /api/dashboard; emergency pause -> banner + closures=8, resume and per-activity toggles; walk-in booking -> voucher; booking blocked when paused / over capacity; bookings search, filters and detail dialog (waiver/check-in/cancel/restore); check-in lookup and pending count update; manifest roster, empty state, print button; notifications sheet; mobile bottom nav with no horizontal overflow. Found 3 functional bugs: Manifest fetch race, notification unread badge logic, search 500.",
+  "backend_issues": {
+    "critical": [],
+    "minor": [
+      {"endpoint": "GET /api/bookings?q=(", "issue": "Returns 500. q is passed raw into $regex. Fix: re.escape(q.strip()). The frontend Bookings search also throws an unhandled promise rejection because there is no .catch."},
+      {"endpoint": "POST /api/bookings", "issue": "date is not validated. 'not-a-date' and past dates are accepted (200). Validate YYYY-MM-DD and require >= today."},
+      {"endpoint": "PATCH /api/bookings/{id}/status", "issue": "Restoring a cancelled booking (-> confirmed) does not re-check batch capacity, so it can overbook. It also allows any transition, e.g. cancelled -> checked_in, or checked_in -> confirmed which silently undoes the check-in."},
+      {"endpoint": "GET /api/events", "issue": "limit is unbounded (no le= constraint)."}
+    ]
+  },
+  "frontend_issues": {
+    "ui_bugs": [
+      {"component": "Manifest.jsx", "issue": "Race condition: changing activity then slot quickly fires 2 requests, and a stale response can overwrite the roster. Reproduced 1 of 4 rapid changes, plus once in the first run: showed Banana 08:00 data while 14:00 was selected. Fix: ignore stale responses via an `ignore` flag / AbortController in the useEffect cleanup.", "selector": "[data-testid^='manifest-row-']", "priority": "MEDIUM"},
+      {"component": "NotificationsSheet.jsx", "issue": "Unread badge = events.length - seen, but /events is capped at 20. Once 20 events exist and the sheet has been opened, new events never raise the badge again. Track the last-seen created_at/id instead of a count.", "selector": "[data-testid='notifications-count']", "priority": "MEDIUM"},
+      {"component": "CheckIn.jsx", "issue": "Duplicate data-testid: the searched booking card and the same booking in the pending list both render checkin-card-{code} / checkin-btn-{code}.", "selector": "[data-testid^='checkin-card-']", "priority": "LOW"}
+    ],
+    "integration_issues": [
+      {"flow": "Activity pause state", "issue": "OpsContext only fetches /activities on mount, with no polling. A pause made from another device/tab does not show up (banner, Front Desk disabled options) until reload. The backend still blocks the booking correctly with a toast.", "affected_selectors": ["[data-testid='pause-banner']", "[data-testid='walkin-activity-select']"]},
+      {"flow": "Error handling", "issue": "Dashboard, Bookings, Manifest and CheckIn list fetches have no .catch or loading/error state. errMsg turns 422 array details into '[object Object]'.", "affected_selectors": []}
+    ],
+    "design_issues": [
+      {"screen": "Booking detail dialog", "issues": ["'Cancel booking' runs immediately with no confirmation, unlike Emergency Pause."]}
+    ]
+  },
+  "test_report_links": ["/app/backend/tests/test_aquaops_api.py", "/app/test_reports/pytest/pytest_results.xml"],
+  "action_items": [
+    "Escape the regex in GET /api/bookings q (re.escape) and add .catch in Bookings.jsx",
+    "Fix the Manifest useEffect race (stale-response guard)",
+    "Fix the notifications unread logic (track last seen event id/timestamp)",
+    "Validate the booking date format and reject past dates in POST /api/bookings",
+    "Re-check capacity on restore (cancelled->confirmed) and restrict invalid status transitions",
+    "Optional: poll /activities in OpsContext; add a confirm before cancelling a booking; dedupe check-in testids"
+  ],
+  "critical_code_review_comments": [
+    "server.py: unescaped user regex leads to a 500 and potential ReDoS",
+    "server.py: no date validation on BookingCreate.date",
+    "server.py: the status endpoint has no state machine or capacity re-check",
+    "Frontend fetches lack error states; errMsg does not handle FastAPI 422 detail arrays"
+  ],
+  "updated_files": ["/app/backend/tests/test_aquaops_api.py"],
+  "success_rate": {"backend": "80% (8/10; failures are edge cases)", "frontend": "~90% (all requested flows work; manifest race + badge logic bugs)"},
+  "seed_data_creation": "None. TEST_ bookings were created and then deleted from MongoDB; all activities resumed.",
+  "retest_needed": true,
+  "should_main_agent_self_test": true,
+  "context_for_next_testing_agent": "No auth. Run: export REACT_APP_BACKEND_URL from frontend/.env; pytest /app/backend/tests/test_aquaops_api.py. The module fixture resumes all activities and cancels TEST_ bookings; delete them from MongoDB for full cleanup. Container date is 2026-10-19 IST. Today: 14 seed bookings (1 cancelled)."
+}

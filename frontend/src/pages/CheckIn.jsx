@@ -33,7 +33,7 @@ export default function CheckIn() {
   const [pending, setPending] = useState([]);
 
   useEffect(() => {
-    api.get("/bookings", { params: { date: todayIST(), status: "confirmed" } }).then(({ data }) => setPending(data));
+    api.get("/bookings", { params: { date: todayIST(), status: "confirmed" } }).then(({ data }) => setPending(data)).catch(() => {});
   }, [tick]);
 
   const lookup = async (e) => {
@@ -74,7 +74,7 @@ export default function CheckIn() {
       </h2>
       <div className="space-y-2">
         {pending.length === 0 && <p className="flex items-center gap-2 text-sm text-emerald-400"><CheckCircle2 size={16} /> Everyone is checked in.</p>}
-        {pending.map((b) => <GuestCard key={b.id} b={b} onCheckIn={checkIn} />)}
+        {pending.filter((b) => b.id !== found?.id).map((b) => <GuestCard key={b.id} b={b} onCheckIn={checkIn} />)}
       </div>
     </div>
   );

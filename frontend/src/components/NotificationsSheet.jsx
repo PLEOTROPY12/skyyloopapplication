@@ -9,16 +9,16 @@ const DOT = { alert: "bg-rose-500", success: "bg-emerald-500", checkin: "bg-cyan
 export const NotificationsSheet = () => {
   const { tick } = useOps();
   const [events, setEvents] = useState([]);
-  const [seen, setSeen] = useState(0);
+  const [seenAt, setSeenAt] = useState("");
 
   useEffect(() => {
-    api.get("/events").then(({ data }) => setEvents(data));
+    api.get("/events").then(({ data }) => setEvents(data)).catch(() => {});
   }, [tick]);
 
-  const unread = Math.max(events.length - seen, 0);
+  const unread = events.filter((e) => e.created_at > seenAt).length;
 
   return (
-    <Sheet onOpenChange={(o) => { if (o) setSeen(events.length); }}>
+    <Sheet onOpenChange={(o) => { if (o && events[0]) setSeenAt(events[0].created_at); }}>
       <SheetTrigger asChild>
         <button data-testid="notifications-bell" className="relative grid h-9 w-9 place-items-center rounded-lg text-slate-300 transition-colors hover:bg-slate-800">
           <Bell size={18} />

@@ -43,7 +43,7 @@ export default function Bookings() {
 
   useEffect(() => {
     const t = setTimeout(() => {
-      api.get("/bookings", { params: f }).then(({ data }) => setRows(data));
+      api.get("/bookings", { params: f }).then(({ data }) => setRows(data)).catch(() => setRows([]));
     }, 250);
     return () => clearTimeout(t);
   }, [f, tick]);

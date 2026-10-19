@@ -61,7 +61,7 @@ export const BookingDetailDialog = ({ booking, onClose, onChanged }) => {
               {b.status === "cancelled" ? (
                 <button data-testid="detail-restore-btn" onClick={() => setStatus("confirmed", "Booking restored")} className="rounded-lg border border-slate-700 px-3 py-2 text-sm text-slate-300 hover:bg-slate-800">Restore</button>
               ) : (
-                <button data-testid="detail-cancel-btn" onClick={() => setStatus("cancelled", "Booking cancelled")} className="rounded-lg border border-rose-500/40 px-3 py-2 text-sm text-rose-300 hover:bg-rose-500/10">Cancel booking</button>
+                <button data-testid="detail-cancel-btn" onClick={() => window.confirm(`Cancel booking ${b.code}?`) && setStatus("cancelled", "Booking cancelled")} className="rounded-lg border border-rose-500/40 px-3 py-2 text-sm text-rose-300 hover:bg-rose-500/10">Cancel booking</button>
               )}
             </div>
           </>

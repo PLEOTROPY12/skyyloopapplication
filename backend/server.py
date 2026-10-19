@@ -1,10 +1,11 @@
-from fastapi import FastAPI, APIRouter, HTTPException
+from fastapi import FastAPI, APIRouter, HTTPException, Query
 from dotenv import load_dotenv
 from starlette.middleware.cors import CORSMiddleware
 from motor.motor_asyncio import AsyncIOMotorClient
 import os
 import logging
 import random
+import re
 import uuid
 from pathlib import Path
 from pydantic import BaseModel, Field
@@ -264,7 +265,7 @@ async def list_bookings(date: Optional[str] = None, status: Optional[str] = None
     if channel and channel != "all":
         query["channel"] = channel
     if q:
-        rx = {"$regex": q.strip(), "$options": "i"}
+        rx = {"$regex": re.escape(q.strip()), "$options": "i"}
         query["$or"] = [{"guest_name": rx}, {"code": rx}, {"phone": rx}]
     return await db.bookings.find(query, {"_id": 0}).sort([("slot", 1), ("created_at", 1)]).to_list(2000)
 
@@ -284,6 +285,12 @@ async def create_booking(body: BookingCreate):
         raise HTTPException(400, f"{act['name']} is currently paused")
     if body.slot not in SLOTS:
         raise HTTPException(400, "Invalid slot")
+    try:
+        datetime.strptime(body.date, "%Y-%m-%d")
+    except ValueError:
+        raise HTTPException(400, "Invalid date")
+    if body.date < today():
+        raise HTTPException(400, "Date cannot be in the past")
     pax = body.adults + body.kids
     if await booked_guests(act["id"], body.date, body.slot) + pax > act["capacity"]:
         raise HTTPException(400, "Not enough seats left in this batch")
@@ -300,6 +307,14 @@ async def update_status(bid: str, body: StatusUpdate):
     b = await db.bookings.find_one({"id": bid}, {"_id": 0})
     if not b:
         raise HTTPException(404, "Booking not found")
+    allowed = {"confirmed": {"checked_in", "cancelled"}, "checked_in": {"completed", "cancelled"},
+               "completed": set(), "cancelled": {"confirmed"}}
+    if body.status not in allowed[b["status"]]:
+        raise HTTPException(400, f"Cannot change {b['status']} booking to {body.status}")
+    if b["status"] == "cancelled":
+        act = await get_activity(b["activity_id"])
+        if await booked_guests(b["activity_id"], b["date"], b["slot"]) + b["adults"] + b["kids"] > act["capacity"]:
+            raise HTTPException(400, "Not enough seats left to restore this booking")
     upd = {"status": body.status}
     if body.status == "checked_in":
         upd["checked_in_at"] = now_iso()
@@ -333,7 +348,7 @@ async def manifest(date: str, activity_id: str, slot: str):
 
 
 @api.get("/events")
-async def events(limit: int = 20):
+async def events(limit: int = Query(20, ge=1, le=100)):
     return await db.ops_events.find({}, {"_id": 0}).sort("created_at", -1).to_list(limit)
 
 

@@ -1,0 +1,135 @@
+{
+  "project_name": "Sky Loooop - Extreme Adventure & Bungee Jump Vendor Portal",
+  "archetype": "THE PERFORMANCE PRO / TACTICAL MINIMALISM",
+  "theme": "Light theme default with crisp slate backgrounds, rich crimson accent (#D9483B / #C0392B), navy high-contrast headers (#0F172A), and clean high-density operational cards.",
+  "typography": {
+    "font_family_heading": "Outfit, sans-serif",
+    "font_family_body": "Plus Jakarta Sans, sans-serif",
+    "font_family_mono": "JetBrains Mono, monospace",
+    "google_fonts_import": "https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Outfit:wght@500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap",
+    "rules": {
+      "H1": "text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-slate-900",
+      "H2": "text-2xl sm:text-3xl font-bold tracking-tight text-slate-900",
+      "H3": "text-xl sm:text-2xl font-semibold text-slate-900",
+      "H4": "text-lg font-semibold text-slate-800",
+      "body": "text-sm sm:text-base text-slate-600 leading-relaxed",
+      "labels_overlines": "text-xs font-bold uppercase tracking-wider text-slate-500",
+      "forbidden_heading_fonts": ["Inter", "Space Grotesk"]
+    }
+  },
+  "colors": {
+    "primary_brand": "#D9483B",
+    "primary_brand_hover": "#C0392B",
+    "primary_brand_light": "#FADBD8",
+    "brand_gradient_drawer": "linear-gradient(135deg, #B03A2E 0%, #7B241C 100%)",
+    "slate_900_navy": "#0F172A",
+    "slate_800": "#1E293B",
+    "slate_100_bg": "#F8FAFC",
+    "slate_50_card": "#FFFFFF",
+    "border_subtle": "#E2E8F0",
+    "success_green": "#10B981",
+    "success_green_bg": "#ECFDF5",
+    "warning_amber": "#F59E0B",
+    "warning_amber_bg": "#FEF3C7",
+    "danger_red": "#EF4444",
+    "danger_red_bg": "#FEF2F2",
+    "forbidden_colors": ["#1B93A4", "#7351B7"],
+    "contrast_rules": "All text on primary buttons must be white (#FFFFFF). All dark text must meet APCA / WCAG AA 4.5:1 ratio against light slate backgrounds."
+  },
+  "visual_enhancers": {
+    "cards": "bg-white border border-slate-200/80 rounded-xl shadow-xs hover:shadow-md transition-all duration-200",
+    "tactical_badges": "px-2.5 py-1 rounded-md text-xs font-semibold tracking-wide inline-flex items-center gap-1.5",
+    "drawer_user_card": "bg-gradient-to-br from-[#B03A2E] to-[#6E1F18] text-white p-4 rounded-xl shadow-md border border-white/10",
+    "stepper_inputs": "flex items-center border border-slate-300 rounded-lg overflow-hidden bg-white shadow-xs",
+    "glass_header": "bg-white/90 backdrop-blur-md border-b border-slate-200 sticky top-0 z-40"
+  },
+  "grids_and_layouts": {
+    "app_shell": "flex h-screen w-full bg-slate-50 overflow-hidden font-sans text-slate-900",
+    "sidebar": "hidden lg:flex flex-col w-72 bg-white border-r border-slate-200 h-full p-4 flex-shrink-0 z-30",
+    "mobile_drawer": "fixed inset-y-0 left-0 w-80 bg-white shadow-2xl z-50 transform transition-transform duration-300 ease-in-out",
+    "main_content": "flex-1 flex flex-col min-w-0 h-full overflow-y-auto bg-slate-50/60 p-4 sm:p-6 lg:p-8",
+    "dashboard_grid": "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6",
+    "form_grid": "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+  },
+  "key_features_to_build": [
+    {
+      "name": "Google Authentication & Session Manager",
+      "description": "Google Login modal/button with simulated JWT auth state, vendor profile toggle (Vendor Role, Jump Tower ID), and persistent local state."
+    },
+    {
+      "name": "Side Drawer & Desktop Sidebar Navigation",
+      "description": "User card at top with maroon-red gradient background, VENDOR badge, avatar, name 'OkGhumo / Sky Loooop Operator', menu items with badges & descriptions: Bookings, Agents, Jump Details, Transactions, Calendar, Profile, Logout."
+    },
+    {
+      "name": "Create Offline Booking",
+      "description": "Complete multi-section form with Location selector (e.g., Rishikesh Tower, Goa Cliff, Manali High Jump), Activity selector (Bungee Jump 83m, Giant Swing, Flying Fox, Combo Pass), Date picker, Time slot select, Full Name, Phone, City (optional), Admin note, Is Agent Booking toggle with agent selector, Price per person (INR), Participants stepper (+/-), Total calculation, Advance amount (INR) with auto-computed balance due."
+    },
+    {
+      "name": "Jump Details Operational Tower Panel",
+      "description": "Real-time tower jump status. Tabs for 'Pending Jumps' and 'Completed Jumps'. Search bar, jump code generator, participant weight check, harness status toggle, safety clearance checklist modal, and 'Record Jump' instant action."
+    },
+    {
+      "name": "Agents Financial Management",
+      "description": "Total Payable (red card) and Total Receivable (green card) metrics. Agent table with search, balance status filter (Positive/Negative/Zero), GST filter, sorting, Add Agent modal, and instant Excel Export feature using CSV format download."
+    },
+    {
+      "name": "Calendar Slot Capacity Matrix",
+      "description": "Day-by-day capacity planner for jump slots (e.g., 09:00 AM - 10:00 AM [8/10 filled], 10:00 AM - 11:00 AM [FULL]). Capacity adjustment stepper, slot lock/unlock toggle, and quick booking directly from slot."
+    },
+    {
+      "name": "Transaction Financial Movement Log",
+      "description": "Detailed log of all payments (UPI, Card, Cash, Agent Credit). Filter by date range, payment mode, agent/direct source, and transaction ID copy feature."
+    },
+    {
+      "name": "Vendor Profile & Tower Settings",
+      "description": "Vendor details, Tower parameters (Height, Safety Protocol level, Slot capacity defaults), Commission rates for agents, and API webhook integrations."
+    }
+  ],
+  "image_urls": [
+    {
+      "category": "hero_adventure",
+      "url": "https://images.unsplash.com/photo-1549221360-456a9c197d5b?crop=entropy&cs=srgb&fm=jpg&q=85",
+      "description": "Man jumping with bungee safety rope in deep gorge",
+      "usage": "Hero banner for vendor dashboard & offline booking header"
+    },
+    {
+      "category": "tower_activity",
+      "url": "https://images.unsplash.com/photo-1778855180305-021b2caca8fd?crop=entropy&cs=srgb&fm=jpg&q=85",
+      "description": "Tall bungee jump tower with JUMP signage against clear sky",
+      "usage": "Jump Details tower header & location select card"
+    },
+    {
+      "category": "zipline_adventure",
+      "url": "https://images.unsplash.com/photo-1758278232683-deb2c2cfdc75?crop=entropy&cs=srgb&fm=jpg&q=85",
+      "description": "Man on platform attached to zipline cable",
+      "usage": "Activity preview card for Flying Fox and Giant Swing"
+    }
+  ],
+  "motion": {
+    "library": "framer-motion",
+    "page_transition": "{ initial: { opacity: 0, y: 8 }, animate: { opacity: 1, y: 0 }, exit: { opacity: 0, y: -8 }, transition: { duration: 0.2, ease: 'easeOut' } }",
+    "drawer_transition": "spring transition with stiffness 300 and damping 30",
+    "micro_interactions": "hover:scale-[1.02] active:scale-[0.98] on interactive buttons, smooth tab active pill indicator"
+  },
+  "accessibility": {
+    "keyboard_nav": "Ensure trap focus inside modals (Add Agent, Offline Booking modal, Record Jump checklist). ESC key closes modals & drawer.",
+    "data_testid": "MANDATORY. Every button, input, tab, card, menu item, select option, and metric value MUST have a unique kebab-case data-testid.",
+    "screen_readers": "Aria labels for icon buttons (mobile menu trigger, stepper buttons, close buttons)."
+  },
+  "component_path": "/app/frontend/src/components/",
+  "instructions_to_main_agent": [
+    "You are building 'Sky Loooop', the high-performance vendor management application for extreme adventure & bungee jump operators.",
+    "Maintain exact layout fidelity to vendor app requirements: Side Drawer on mobile, sleek persistent Sidebar on desktop with maroon-red gradient user card at the top.",
+    "Implement high-density, touch-friendly UI for operational fast check-in at the tower.",
+    "Use Lucide icons (lucide-react) for menu icons: Calendar, Users, ClipboardCheck, ArrowUpRight, ArrowDownLeft, Receipt, Settings, LogOut, Plus, Search, Download, Filter.",
+    "Include Sonner for toast feedback on all actions (Booking created, Jump status updated, Agent balance adjusted, Excel exported).",
+    "Ensure Javascript file extensions (.js / .jsx) are used as standard in frontend/src.",
+    "Add sample comprehensive seed data so the dashboard is immediately populated with 10+ bookings, 6+ agents, real-time slot capacity numbers, and pending tower jump entries."
+  ],
+  "UNIVERSAL GUIDELINES FOR MAIN AGENT": {
+    "dark_light_theme": "Light mode default with slate-50 background, slate-900 typography, and bold crimson accent.",
+    "gradient_rule": "No full dark screen gradients. Use gradient only on the User Drawer Card (#B03A2E -> #6E1F18).",
+    "data_testid": "Every interactive component MUST have a data-testid attribute.",
+    "toast_notification": "Use sonner for notifications."
+  }
+}

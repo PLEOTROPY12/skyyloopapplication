@@ -6,6 +6,7 @@ import os
 import logging
 import uuid
 import random
+import re
 import httpx
 from pathlib import Path
 from pydantic import BaseModel, Field
@@ -65,10 +66,15 @@ async def current_user(request: Request) -> dict:
     if not user:
         raise HTTPException(401, "User not found")
     if not user.get("seeded"):
-        await seed_vendor(user["user_id"])
-        await db.users.update_one({"user_id": user["user_id"]}, {"$set": {"seeded": True}})
+        await ensure_seeded(user["user_id"])
         user["seeded"] = True
     return user
+
+
+async def ensure_seeded(user_id):
+    claimed = await db.users.find_one_and_update({"user_id": user_id, "seeded": {"$ne": True}}, {"$set": {"seeded": True}})
+    if claimed:
+        await seed_vendor(user_id)
 
 
 class SessionIn(BaseModel):
@@ -100,11 +106,8 @@ async def auth_session(body: SessionIn, response: Response):
         "expires_at": datetime.now(timezone.utc) + timedelta(days=7), "created_at": now_iso(),
     })
     response.set_cookie("session_token", token, httponly=True, secure=True, samesite="none", path="/", max_age=7 * 86400)
-    user = await db.users.find_one({"user_id": user_id}, {"_id": 0})
-    if not user.get("seeded"):
-        await seed_vendor(user_id)
-        await db.users.update_one({"user_id": user_id}, {"$set": {"seeded": True}})
-    return user
+    await ensure_seeded(user_id)
+    return await db.users.find_one({"user_id": user_id}, {"_id": 0})
 
 
 @api.get("/auth/me")
@@ -115,6 +118,9 @@ async def auth_me(user: dict = Depends(current_user)):
 @api.post("/auth/logout")
 async def auth_logout(request: Request, response: Response):
     token = request.cookies.get("session_token")
+    auth = request.headers.get("Authorization", "")
+    if not token and auth.startswith("Bearer "):
+        token = auth[7:]
     if token:
         await db.user_sessions.delete_one({"session_token": token})
     response.delete_cookie("session_token", path="/", secure=True, samesite="none")
@@ -141,6 +147,17 @@ async def update_profile(body: ProfileIn, user: dict = Depends(current_user)):
 
 
 # ---------- Helpers ----------
+def check_activity(activity_id, slot=None):
+    if activity_id not in ACT or (slot is not None and slot not in SLOTS):
+        raise HTTPException(400, "Invalid activity or slot")
+
+
+def check_date(date):
+    try:
+        datetime.strptime(date, "%Y-%m-%d")
+    except ValueError:
+        raise HTTPException(400, "Invalid date, use YYYY-MM-DD")
+
 async def slot_capacity(vid, date, activity_id, slot):
     o = await db.capacity_overrides.find_one({"vendor_id": vid, "date": date, "activity_id": activity_id, "slot": slot}, {"_id": 0})
     return o["capacity"] if o else ACT[activity_id]["capacity"]
@@ -181,8 +198,8 @@ class BookingIn(BaseModel):
 
 
 async def create_booking_doc(vid, b: BookingIn, created_at=None):
-    if b.activity_id not in ACT or b.slot not in SLOTS:
-        raise HTTPException(400, "Invalid activity or slot")
+    check_activity(b.activity_id, b.slot)
+    check_date(b.date)
     agent = None
     if b.is_agent_booking:
         agent = await db.agents.find_one({"vendor_id": vid, "id": b.agent_id}, {"_id": 0})
@@ -217,6 +234,9 @@ async def create_booking_doc(vid, b: BookingIn, created_at=None):
 
 @api.post("/bookings")
 async def create_booking(body: BookingIn, user: dict = Depends(current_user)):
+    check_date(body.date)
+    if body.date < (datetime.now(timezone.utc) - timedelta(days=1)).strftime("%Y-%m-%d"):
+        raise HTTPException(400, "Booking date cannot be in the past")
     return await create_booking_doc(user["user_id"], body)
 
 
@@ -230,7 +250,7 @@ async def list_bookings(q: str = "", status: str = "", date: str = "", activity_
     if activity_id:
         query["activity_id"] = activity_id
     if q:
-        query["$or"] = [{k: {"$regex": q, "$options": "i"}} for k in ("full_name", "phone", "booking_no")]
+        query["$or"] = [{k: {"$regex": re.escape(q), "$options": "i"}} for k in ("full_name", "phone", "booking_no")]
     return await db.bookings.find(query, {"_id": 0}).sort("created_at", -1).to_list(500)
 
 
@@ -257,6 +277,8 @@ async def cancel_booking(bid: str, user: dict = Depends(current_user)):
     if not b or b["status"] != "confirmed":
         raise HTTPException(404, "Booking not found")
     await db.bookings.update_one({"id": bid}, {"$set": {"status": "cancelled"}})
+    if b["advance_amount"] > 0:
+        await add_txn(user["user_id"], "debit", b["advance_amount"], b.get("payment_mode", "Cash"), "Refund on cancellation", b["full_name"], b["booking_no"])
     if b.get("agent_id"):
         delta = b["total_amount"] - b["advance_amount"] - b["commission"]
         await db.agents.update_one({"id": b["agent_id"]}, {"$inc": {"balance": -round(delta, 2)}})
@@ -272,7 +294,7 @@ async def list_jumps(q: str = "", date: str = "", activity_id: str = "", user: d
     if activity_id:
         query["activity_id"] = activity_id
     if q:
-        query["$or"] = [{k: {"$regex": q, "$options": "i"}} for k in ("full_name", "phone", "booking_no")]
+        query["$or"] = [{k: {"$regex": re.escape(q), "$options": "i"}} for k in ("full_name", "phone", "booking_no")]
     pending, completed = [], []
     async for b in db.bookings.find(query, {"_id": 0}).sort([("date", 1), ("slot", 1)]):
         for j in b["jumpers"]:
@@ -377,7 +399,7 @@ async def list_txns(q: str = "", type: str = "", mode: str = "", user: dict = De
     if mode:
         query["mode"] = mode
     if q:
-        query["$or"] = [{k: {"$regex": q, "$options": "i"}} for k in ("party", "description", "booking_no")]
+        query["$or"] = [{k: {"$regex": re.escape(q), "$options": "i"}} for k in ("party", "description", "booking_no")]
     items = await db.transactions.find(query, {"_id": 0}).sort("created_at", -1).to_list(1000)
     credit = round(sum(t["amount"] for t in items if t["type"] == "credit"), 2)
     debit = round(sum(t["amount"] for t in items if t["type"] == "debit"), 2)
@@ -394,6 +416,9 @@ async def create_txn(body: TxnIn, user: dict = Depends(current_user)):
 @api.get("/calendar")
 async def calendar_month(month: str, activity_id: str = "act_bungee", user: dict = Depends(current_user)):
     vid = user["user_id"]
+    check_activity(activity_id)
+    if not re.fullmatch(r"\d{4}-(0[1-9]|1[0-2])", month):
+        raise HTTPException(400, "Invalid month, use YYYY-MM")
     y, m = map(int, month.split("-"))
     days_in = ((datetime(y + (m // 12), m % 12 + 1, 1)) - datetime(y, m, 1)).days
     booked = await booked_map(vid, {"activity_id": activity_id, "date": {"$regex": f"^{month}"}})
@@ -412,6 +437,8 @@ async def calendar_month(month: str, activity_id: str = "act_bungee", user: dict
 @api.get("/calendar/day")
 async def calendar_day(date: str, activity_id: str, user: dict = Depends(current_user)):
     vid = user["user_id"]
+    check_activity(activity_id)
+    check_date(date)
     booked = await booked_map(vid, {"activity_id": activity_id, "date": date})
     return {"slots": [{"slot": s, "booked": booked.get((date, s), 0), "capacity": await slot_capacity(vid, date, activity_id, s)} for s in SLOTS]}
 
@@ -425,6 +452,11 @@ class CapacityIn(BaseModel):
 
 @api.put("/calendar/capacity")
 async def set_capacity(body: CapacityIn, user: dict = Depends(current_user)):
+    check_activity(body.activity_id, body.slot)
+    check_date(body.date)
+    booked = (await booked_map(user["user_id"], {"date": body.date, "activity_id": body.activity_id, "slot": body.slot})).get((body.date, body.slot), 0)
+    if body.capacity < booked:
+        raise HTTPException(400, f"Capacity cannot be below {booked} already booked")
     await db.capacity_overrides.update_one(
         {"vendor_id": user["user_id"], "date": body.date, "activity_id": body.activity_id, "slot": body.slot},
         {"$set": {"capacity": body.capacity}}, upsert=True)

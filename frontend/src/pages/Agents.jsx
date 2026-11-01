@@ -95,7 +95,7 @@ export default function Agents() {
         </Card>
       </div>
       <Card className="p-4 mb-6 flex flex-wrap gap-3 items-center">
-        <div className="flex-1 min-w-[220px] flex items-center gap-3 px-3 h-11 rounded-lg border border-slate-200">
+        <div className="basis-full flex items-center gap-3 px-3 h-11 rounded-lg border border-slate-200">
           <Search className="h-4 w-4 text-brand" />
           <input value={p.q} onChange={set("q")} placeholder="Search by name, email, or phone..." className="flex-1 outline-none text-sm bg-transparent" data-testid="agents-search-input" />
         </div>

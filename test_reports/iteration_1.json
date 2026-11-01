@@ -1,0 +1,45 @@
+{
+  "summary": "First full run of the Sky Loooop vendor panel: backend pytest (16 tests, run with an isolated throwaway vendor) and Playwright UI tests on desktop 1920 and mobile 390. Every requested feature works end to end: auth redirect, bookings stats, filters, create (price auto-fill, spots left, stepper, totals, agent toggle, capacity overflow rejected), collect payment, cancel, jumps mark/undo/filters, agents totals/filters/CSV/add/settle, transactions list/filters/add, calendar capacity edit, profile save, mobile drawer/FAB, logout. The only failures are edge-case 500s on invalid input.",
+  "backend_issues": {
+    "critical": [],
+    "minor": [
+      {"endpoint": "GET /api/bookings, /api/jumps, /api/transactions (q param)", "issue": "Search text goes straight into a Mongo $regex without re.escape. Special characters like '(' or '+' (for example a '+91' phone, which the phone input allows) cause a 500. Fix: use re.escape(q)."},
+      {"endpoint": "GET /api/calendar, GET /api/calendar/day", "issue": "An invalid activity_id causes a KeyError (500) in ACT[...]. A malformed month (for example 'bad') causes a ValueError (500). Validate and return 400."},
+      {"endpoint": "PUT /api/calendar/capacity", "issue": "activity_id and slot are not checked against the catalog. Capacity can also be set below the number already booked, with no warning."},
+      {"endpoint": "POST /api/auth/logout", "issue": "Only reads the cookie. A Bearer-token session is never deleted on the server."},
+      {"endpoint": "seed_vendor via current_user", "issue": "The check-then-seed step is not atomic. Two concurrent first requests (the frontend fires several in parallel) can double-seed agents and bookings."},
+      {"endpoint": "POST /api/bookings", "issue": "The date is not validated (format, or a date in the past). Cancelling a booking does not record a refund or reversal transaction for the advance already paid."}
+    ]
+  },
+  "frontend_issues": {
+    "ui_bugs": [
+      {"component": "CreateBooking slot list", "issue": "Race condition: changing activity and date quickly fires two /calendar/day requests with no stale-response guard. Once the UI showed '04:00 PM (6 left)' while the backend said only 3 spots were left. Use an AbortController or ignore stale responses.", "selector": "[data-testid='slot-select']", "priority": "MEDIUM"},
+      {"component": "CreateBooking clear-location button", "issue": "Clearing the location does not reset activity_id or slot, so a stale activity can still be submitted.", "selector": "[data-testid='clear-location-btn']", "priority": "LOW"}
+    ],
+    "integration_issues": [],
+    "design_issues": [
+      {"screen": "Bookings and Agents filter bars", "issues": ["Native browser date pickers (input type=date) are used instead of the shadcn Calendar/Popover, on both bookings-date-filter and the create-booking date-input.", "Mobile 390px: the bookings search box is squashed, much shorter than the other inputs.", "Desktop: the agents search placeholder is cut off ('Search by name, email, or p') because the filter row is crowded."]}
+    ]
+  },
+  "test_report_links": ["/app/backend/tests/test_sky_loooop_api.py", "/app/test_reports/pytest/pytest_results.xml"],
+  "action_items": [
+    "Escape regex input (re.escape) in bookings, jumps and transactions search to stop the 500s",
+    "Validate activity_id, month and date on the calendar endpoints and on capacity PUT; return 400 instead of 500",
+    "Guard against stale /calendar/day responses in CreateBooking",
+    "Make seeding idempotent and atomic (for example a findOneAndUpdate flag before seeding)",
+    "Logout should also handle the Bearer token",
+    "Optional: replace native date inputs with the shadcn calendar; fix the squashed mobile search input"
+  ],
+  "critical_code_review_comments": [
+    "server.py is 497 lines, which is acceptable; consider splitting it into routers",
+    "The Agents settle mode is hardcoded to Cash in the UI, so the user cannot pick UPI or Bank",
+    "Cancelling a booking keeps the advance in transactions with no refund entry, which could mislead the ledger"
+  ],
+  "updated_files": ["/app/backend/tests/test_sky_loooop_api.py"],
+  "success_rate": {"backend": "87.5% (14/16; the 2 failures are edge-case 500s)", "frontend": "100% of the requested flows"},
+  "test_credentials": "test_session_sky1 (test-user-1), from /app/memory/test_credentials.md. Created test_session_logout_ui for the logout test; it is now deleted.",
+  "seed_data_creation": "The UI run on test-user-1 created: booking 'TEST_UI Customer' (Sky Cycle 2026-11-16 04:00 PM, agent Ravi), agent 'TEST_UI Agent' (+500 balance), transaction 'TEST_UI Diesel', a capacity override (Sky Cycle 2026-11-16 04:00 PM = 8), a 100 INR payment on one seeded booking, and profile phone/address changes. The pytest run uses a throwaway TEST_ vendor that is cleaned up afterwards.",
+  "retest_needed": false,
+  "should_main_agent_self_test": true,
+  "context_for_next_testing_agent": "Run pytest /app/backend/tests/test_sky_loooop_api.py. It creates its own vendor and session via pymongo and needs MONGO_URL and DB_NAME from backend/.env. For UI, set cookie session_token=test_session_sky1. Do not use it for the logout test; create a separate session first. The browser clock is around 2026-11-01."
+}

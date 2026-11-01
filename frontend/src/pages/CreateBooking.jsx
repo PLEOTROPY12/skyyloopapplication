@@ -28,7 +28,9 @@ export default function CreateBooking() {
 
   useEffect(() => {
     if (!f.activity_id || !f.date) return setSlots([]);
-    api.get("/calendar/day", { params: { date: f.date, activity_id: f.activity_id } }).then((r) => setSlots(r.data.slots));
+    let live = true;
+    api.get("/calendar/day", { params: { date: f.date, activity_id: f.activity_id } }).then((r) => live && setSlots(r.data.slots));
+    return () => { live = false; };
   }, [f.activity_id, f.date]);
 
   const activities = useMemo(() => (cat?.activities || []).filter((a) => a.location_id === f.location_id), [cat, f.location_id]);
@@ -69,7 +71,7 @@ export default function CreateBooking() {
               <option value="">Select location</option>
               {cat.locations.map((l) => <option key={l.id} value={l.id}>{l.name}</option>)}
             </select>
-            {f.location_id && <button onClick={() => set("location_id", "")} aria-label="Clear location" data-testid="clear-location-btn"><X className="h-4 w-4 text-slate-400" /></button>}
+            {f.location_id && <button onClick={() => setF((s) => ({ ...s, location_id: "", activity_id: "", slot: "" }))} aria-label="Clear location" data-testid="clear-location-btn"><X className="h-4 w-4 text-slate-400" /></button>}
           </Field>
           <Field icon={Ticket}>
             <select value={f.activity_id} onChange={(e) => pickActivity(e.target.value)} className={inputCls} data-testid="activity-select">

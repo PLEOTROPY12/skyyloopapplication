@@ -87,7 +87,7 @@ export default function Bookings() {
         </div>
       )}
       <Card className="p-3 mb-6 flex flex-col sm:flex-row gap-3">
-        <div className="flex-1 flex items-center gap-3 px-3 h-11 rounded-lg border border-slate-200">
+        <div className="sm:flex-1 shrink-0 flex items-center gap-3 px-3 h-11 rounded-lg border border-slate-200">
           <Search className="h-4 w-4 text-slate-400" />
           <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search name, number, booking no..." className="flex-1 outline-none text-sm bg-transparent" data-testid="bookings-search-input" />
         </div>
